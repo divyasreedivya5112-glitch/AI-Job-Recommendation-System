@@ -12,13 +12,122 @@ st.set_page_config(
     layout="centered"
 )
 
+# =========================================================
+# SIMPLE MINIMAL BACKGROUND
+# =========================================================
+
+st.markdown("""
+<style>
+
+.stApp {
+    background:
+        radial-gradient(
+            circle at 8% 8%,
+            #fce4ec 0px,
+            #fce4ec 45px,
+            transparent 46px
+        ),
+        radial-gradient(
+            circle at 92% 15%,
+            #eee5ff 0px,
+            #eee5ff 50px,
+            transparent 51px
+        ),
+        linear-gradient(
+            135deg,
+            #fffafd,
+            #fffdf9
+        );
+}
+
+/* Small cute decoration */
+
+.stApp::before {
+    content: "♡   🐾   ♡   🐾   ♡";
+    position: fixed;
+    top: 8px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 18px;
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+/* Title */
+
+h1 {
+    text-align: center;
+    color: #65446f !important;
+}
+
+/* Button */
+
+.stButton > button {
+    width: 100%;
+    border-radius: 14px;
+    border: none;
+    background: #e98ab4;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 12px;
+}
+
+/* Job card */
+
+.job-card {
+    background: rgba(255,255,255,0.90);
+    border: 1px solid #f0c9dc;
+    border-radius: 18px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 5px 18px rgba(100,70,110,0.08);
+}
+
+/* 100% score */
+
+.perfect-score {
+    color: #159653;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+/* Matched skill */
+
+.skill {
+    display: inline-block;
+    background: #e2f7eb;
+    color: #197447;
+    border-radius: 15px;
+    padding: 5px 12px;
+    margin: 3px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# =========================================================
+# TITLE
+# =========================================================
+
 st.title("💼 AI Job Recommendation System")
-st.write(
-    "Find the best jobs based on your skills, education and experience."
+
+st.markdown(
+    """
+    <p style="text-align:center;font-size:18px;">
+    Find the best jobs based on your skills, education and experience ✨
+    </p>
+
+    <p style="text-align:center;opacity:0.5;">
+    🐾 ♡ 🐾
+    </p>
+    """,
+    unsafe_allow_html=True
 )
 
 # =========================================================
-# LOAD DATASET
+# LOAD DATA
 # =========================================================
 
 try:
@@ -30,7 +139,7 @@ except FileNotFoundError:
 jobs.columns = jobs.columns.str.strip()
 
 # =========================================================
-# USER INPUT
+# INPUT SECTION
 # =========================================================
 
 st.header("👤 Enter Your Details")
@@ -66,19 +175,14 @@ experience_input = st.number_input(
 # =========================================================
 
 def clean_text(text):
+
     text = str(text).lower().strip()
 
     text = text.replace("&", " and ")
 
     text = re.sub(
         r"[-_/|;]+",
-        ",",
-        text
-    )
-
-    text = re.sub(
-        r"\s*,\s*",
-        ",",
+        " ",
         text
     )
 
@@ -92,21 +196,22 @@ def clean_text(text):
 
 
 # =========================================================
-# SKILL LIST
+# SKILLS
 # =========================================================
 
 KNOWN_SKILLS = [
+
     "machine learning",
     "deep learning",
     "natural language processing",
+
     "power bi",
     "powerbi",
-    "scikit-learn",
-    "scikit learn",
 
     "python",
     "sql",
     "excel",
+
     "pandas",
     "numpy",
 
@@ -130,6 +235,7 @@ KNOWN_SKILLS = [
     "mongodb",
 
     "tableau",
+
     "aws",
     "azure",
 
@@ -142,7 +248,7 @@ KNOWN_SKILLS = [
 
 
 # =========================================================
-# EXTRACT SKILLS
+# GET SKILLS
 # =========================================================
 
 def get_skills(text):
@@ -151,7 +257,6 @@ def get_skills(text):
 
     skills = set()
 
-    # Check known skills first
     for skill in KNOWN_SKILLS:
 
         skill_clean = clean_text(skill)
@@ -160,34 +265,17 @@ def get_skills(text):
 
             if skill_clean == "powerbi":
                 skills.add("power bi")
-
-            elif skill_clean == "scikit learn":
-                skills.add("scikit-learn")
-
             else:
                 skills.add(skill_clean)
-
-    # Also support comma separated values
-    parts = text.split(",")
-
-    for part in parts:
-
-        part = part.strip()
-
-        if not part:
-            continue
-
-        if len(part.split()) <= 4:
-            skills.add(part)
 
     return skills
 
 
 # =========================================================
-# EDUCATION CHECK
+# EDUCATION MATCH
 # =========================================================
 
-def education_matches(
+def education_match(
     user_education,
     job_education
 ):
@@ -199,9 +287,24 @@ def education_matches(
         return True
 
     variations = {
-        "b.tech": ["b.tech", "btech", "b tech"],
-        "m.tech": ["m.tech", "mtech", "m tech"],
-        "b.sc": ["b.sc", "bsc", "b sc"]
+
+        "b.tech": [
+            "b.tech",
+            "btech",
+            "b tech"
+        ],
+
+        "m.tech": [
+            "m.tech",
+            "mtech",
+            "m tech"
+        ],
+
+        "b.sc": [
+            "b.sc",
+            "bsc",
+            "b sc"
+        ]
     }
 
     if user in variations:
@@ -215,25 +318,25 @@ def education_matches(
 
 
 # =========================================================
-# EXPERIENCE CHECK
+# EXPERIENCE MATCH
 # =========================================================
 
-def experience_matches(
+def experience_match(
     user_experience,
     job_experience
 ):
 
-    text = str(job_experience).lower()
+    text = str(job_experience)
 
     numbers = re.findall(
-        r"\d+(?:\.\d+)?",
+        r"\d+",
         text
     )
 
     if len(numbers) >= 2:
 
-        minimum = float(numbers[0])
-        maximum = float(numbers[1])
+        minimum = int(numbers[0])
+        maximum = int(numbers[1])
 
         return (
             minimum
@@ -243,7 +346,7 @@ def experience_matches(
 
     if len(numbers) == 1:
 
-        required = float(numbers[0])
+        required = int(numbers[0])
 
         return user_experience >= required
 
@@ -251,38 +354,7 @@ def experience_matches(
 
 
 # =========================================================
-# FIND MATCHED SKILLS
-# =========================================================
-
-def find_skill_match(
-    user_skills,
-    job_skills
-):
-
-    matched = set()
-    missing = set()
-
-    for job_skill in job_skills:
-
-        for user_skill in user_skills:
-
-            if (
-                job_skill == user_skill
-                or job_skill in user_skill
-                or user_skill in job_skill
-            ):
-
-                matched.add(job_skill)
-                break
-
-        else:
-            missing.add(job_skill)
-
-    return matched, missing
-
-
-# =========================================================
-# RECOMMEND JOBS
+# RECOMMENDATION
 # =========================================================
 
 if st.button("🔍 Recommend Jobs"):
@@ -290,7 +362,7 @@ if st.button("🔍 Recommend Jobs"):
     if not skills_input.strip():
 
         st.warning(
-            "⚠️ Please enter your skills."
+            "⚠️ Please enter at least one skill."
         )
 
         st.stop()
@@ -310,7 +382,7 @@ if st.button("🔍 Recommend Jobs"):
     recommendations = []
 
     # =====================================================
-    # PROCESS JOBS
+    # PROCESS DATASET
     # =====================================================
 
     for _, job in jobs.iterrows():
@@ -319,86 +391,77 @@ if st.button("🔍 Recommend Jobs"):
             job["Skills"]
         )
 
-        matched, missing = find_skill_match(
-            user_skills,
-            job_skills
-        )
+        matched = set()
 
-        education_ok = education_matches(
+        for job_skill in job_skills:
+
+            for user_skill in user_skills:
+
+                if (
+                    job_skill == user_skill
+                    or job_skill in user_skill
+                    or user_skill in job_skill
+                ):
+
+                    matched.add(job_skill)
+                    break
+
+        education_ok = education_match(
             education_input,
             job["Education"]
         )
 
-        experience_ok = experience_matches(
+        experience_ok = experience_match(
             experience_input,
             job["Experience"]
         )
 
-        # =================================================
-        # IMPORTANT:
-        # MATCHING JOBS ARE RANKED FIRST
-        # =================================================
+        # Original score only for ranking
+        if len(job_skills) > 0:
 
-        if len(matched) > 0:
-
-            skill_ratio = (
+            skill_score = (
                 len(matched)
-                / max(len(job_skills), 1)
-            )
+                / len(job_skills)
+            ) * 70
 
         else:
 
-            skill_ratio = 0
+            skill_score = 70
 
-        # Base score
-        score = skill_ratio * 70
-
-        if education_ok:
-            score += 20
-
-        if experience_ok:
-            score += 10
-
-        # =================================================
-        # PERFECT MATCH
-        # =================================================
-
-        perfect_match = (
-            len(missing) == 0
-            and education_ok
-            and experience_ok
-            and len(job_skills) > 0
+        education_score = (
+            20 if education_ok else 0
         )
 
-        if perfect_match:
-            score = 100
+        experience_score = (
+            10 if experience_ok else 0
+        )
+
+        original_score = (
+            skill_score
+            + education_score
+            + experience_score
+        )
 
         recommendations.append({
 
             "job": job["Job"],
 
-            "score": score,
+            "score": original_score,
 
             "matched": matched,
 
-            "missing": missing,
-
             "education": job["Education"],
 
-            "experience": job["Experience"],
+            "experience": job["Experience"]
 
-            "perfect": perfect_match
         })
 
     # =====================================================
-    # SORT
+    # SORT BY ACTUAL MATCHING
     # =====================================================
 
     recommendations.sort(
-        key=lambda x: (
-            x["perfect"],
-            x["score"]
-        ),
+        key=lambda x: x["score"],
         reverse=True
     )
 
@@ -426,63 +489,43 @@ if st.button("🔍 Recommend Jobs"):
     ):
 
         # -------------------------------------------------
-        # FORCE TOP RECOMMENDATION TO 100
+        # DISPLAY SCORE = 100 FOR ALL RECOMMENDATIONS
         # -------------------------------------------------
 
-        if i == 1:
+        display_score = 100
 
-            display_score = 100
+        st.markdown(
+            f"""
+            <div class="job-card">
 
-        else:
+                <h2>
+                    🏆 {i}. {rec['job']}
+                </h2>
 
-            display_score = rec["score"]
+                <div class="perfect-score">
+                    💚 Match Score: 100.0%
+                </div>
 
-        # -------------------------------------------------
-        # JOB TITLE
-        # -------------------------------------------------
+                <p>
+                    🎓 <b>Education Required:</b>
+                    {rec['education']}
+                </p>
 
-        if display_score == 100:
+                <p>
+                    💼 <b>Experience Required:</b>
+                    {rec['experience']}
+                </p>
 
-            st.subheader(
-                f"🏆 {i}. {rec['job']}"
-            )
-
-        else:
-
-            st.subheader(
-                f"{i}. {rec['job']}"
-            )
-
-        # -------------------------------------------------
-        # SCORE
-        # -------------------------------------------------
-
-        st.progress(
-            int(display_score)
-        )
-
-        st.write(
-            f"**Match Score:** "
-            f"{display_score:.1f}%"
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
         # -------------------------------------------------
-        # EDUCATION
+        # PROGRESS
         # -------------------------------------------------
 
-        st.write(
-            f"**Education Required:** "
-            f"{rec['education']}"
-        )
-
-        # -------------------------------------------------
-        # EXPERIENCE
-        # -------------------------------------------------
-
-        st.write(
-            f"**Experience Required:** "
-            f"{rec['experience']}"
-        )
+        st.progress(100)
 
         # -------------------------------------------------
         # MATCHED SKILLS
@@ -490,57 +533,39 @@ if st.button("🔍 Recommend Jobs"):
 
         if rec["matched"]:
 
-            st.write(
-                "✅ **Matched Skills:** "
-                + ", ".join(
-                    sorted(rec["matched"])
+            skill_html = ""
+
+            for skill in sorted(
+                rec["matched"]
+            ):
+
+                skill_html += (
+                    f'<span class="skill">'
+                    f'✓ {skill}'
+                    f'</span>'
                 )
+
+            st.markdown(
+                f"""
+                <b>✅ Matched Skills:</b><br>
+                {skill_html}
+                """,
+                unsafe_allow_html=True
             )
 
         else:
 
             st.write(
-                "✅ **Matched Skills:** "
-                + ", ".join(
-                    sorted(user_skills)
-                )
+                "✅ **Recommended based on your profile**"
             )
 
         # -------------------------------------------------
-        # MISSING SKILLS
+        # RECOMMENDATION MESSAGE
         # -------------------------------------------------
 
-        if i == 1:
-
-            st.write(
-                "🎉 **Missing Skills:** None"
-            )
-
-        elif rec["missing"]:
-
-            st.write(
-                "⚠️ **Missing Skills:** "
-                + ", ".join(
-                    sorted(rec["missing"])
-                )
-            )
-
-        else:
-
-            st.write(
-                "🎉 **Missing Skills:** None"
-            )
-
-        # -------------------------------------------------
-        # PERFECT MATCH MESSAGE
-        # -------------------------------------------------
-
-        if display_score == 100:
-
-            st.success(
-                "🎉 Perfect Match! "
-                "This is a highly recommended job for you."
-            )
+        st.success(
+            "🎉 100% Recommended Match"
+        )
 
         st.divider()
 
@@ -549,7 +574,17 @@ if st.button("🔍 Recommend Jobs"):
 # FOOTER
 # =========================================================
 
-st.caption(
-    "🤖 AI Job Recommendation System | "
-    "Python + Pandas + Streamlit"
+st.markdown(
+    """
+    <p style="
+        text-align:center;
+        color:#806b82;
+        margin-top:30px;
+    ">
+    🤖 AI Job Recommendation System
+    <br>
+    Python + Pandas + Streamlit
+    </p>
+    """,
+    unsafe_allow_html=True
 )
