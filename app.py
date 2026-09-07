@@ -1,634 +1,198 @@
-import streamlit as st
-import pandas as pd
-import re
-
 # =========================================================
-# PAGE
+# STYLISH MINIMAL BACKGROUND
 # =========================================================
 
-st.set_page_config(
-    page_title="AI Job Recommendation",
-    page_icon="💼",
-    layout="centered"
-)
+st.markdown("""
+<style>
 
-st.title("💼 AI Job Recommendation System")
-st.write(
-    "Find the best jobs based on your skills, education and experience."
-)
+.stApp {
+    background:
+        radial-gradient(
+            circle at 8% 12%,
+            rgba(255, 182, 210, 0.28) 0px,
+            rgba(255, 182, 210, 0.12) 90px,
+            transparent 180px
+        ),
+        radial-gradient(
+            circle at 92% 18%,
+            rgba(194, 174, 255, 0.25) 0px,
+            rgba(194, 174, 255, 0.10) 100px,
+            transparent 190px
+        ),
+        radial-gradient(
+            circle at 90% 88%,
+            rgba(255, 220, 170, 0.22) 0px,
+            rgba(255, 220, 170, 0.08) 100px,
+            transparent 180px
+        ),
+        linear-gradient(
+            135deg,
+            #fff9fc 0%,
+            #fffdf9 50%,
+            #faf8ff 100%
+        );
 
-# =========================================================
-# LOAD DATASET
-# =========================================================
-
-try:
-    jobs = pd.read_csv("jobs.csv")
-except FileNotFoundError:
-    st.error("❌ jobs.csv file not found!")
-    st.stop()
-
-jobs.columns = jobs.columns.str.strip()
-
-# =========================================================
-# USER INPUT
-# =========================================================
-
-st.header("👤 Enter Your Details")
-
-skills_input = st.text_input(
-    "🛠️ Enter your skills",
-    placeholder="Example: Python, SQL, Flask, Pandas, NumPy"
-)
-
-education_input = st.selectbox(
-    "🎓 Select your education",
-    [
-        "B.Tech",
-        "BCA",
-        "MCA",
-        "M.Tech",
-        "B.Sc",
-        "MBA",
-        "M.Tech, MBA"
-    ]
-)
-
-experience_input = st.number_input(
-    "💼 Enter your experience in years",
-    min_value=0,
-    max_value=30,
-    value=0,
-    step=1
-)
-
-# =========================================================
-# CLEAN TEXT
-# =========================================================
-
-def clean_text(text):
-    text = str(text).lower().strip()
-
-    text = text.replace("&", " and ")
-
-    text = re.sub(r"[-_/|;]+", " ", text)
-    text = re.sub(r"\s+", " ", text)
-
-    return text.strip()
-
-
-# =========================================================
-# SKILL ALIASES
-# =========================================================
-
-SKILL_ALIASES = {
-
-    "python": [
-        "python"
-    ],
-
-    "sql": [
-        "sql",
-        "mysql",
-        "postgresql",
-        "database"
-    ],
-
-    "flask": [
-        "flask"
-    ],
-
-    "django": [
-        "django"
-    ],
-
-    "pandas": [
-        "pandas"
-    ],
-
-    "numpy": [
-        "numpy"
-    ],
-
-    "scikit-learn": [
-        "scikit learn",
-        "scikit-learn",
-        "sklearn"
-    ],
-
-    "machine learning": [
-        "machine learning",
-        "ml"
-    ],
-
-    "deep learning": [
-        "deep learning",
-        "dl"
-    ],
-
-    "html": [
-        "html"
-    ],
-
-    "css": [
-        "css"
-    ],
-
-    "javascript": [
-        "javascript",
-        "js"
-    ],
-
-    "react": [
-        "react",
-        "reactjs"
-    ],
-
-    "java": [
-        "java"
-    ],
-
-    "git": [
-        "git",
-        "github"
-    ],
-
-    "excel": [
-        "excel",
-        "ms excel"
-    ],
-
-    "power bi": [
-        "power bi",
-        "powerbi"
-    ],
-
-    "tableau": [
-        "tableau"
-    ],
-
-    "streamlit": [
-        "streamlit"
-    ],
-
-    "tensorflow": [
-        "tensorflow"
-    ],
-
-    "pytorch": [
-        "pytorch"
-    ],
-
-    "aws": [
-        "aws",
-        "amazon web services"
-    ],
-
-    "azure": [
-        "azure"
-    ]
+    background-attachment: fixed;
 }
 
-# =========================================================
-# GET USER SKILLS
-# =========================================================
 
-def get_skills(text):
+/* Very small cute decorations */
 
-    text = clean_text(text)
+.stApp::before {
+    content: "♡   🐾        ✦        🐾   ♡";
+    position: fixed;
+    top: 12px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 18px;
+    letter-spacing: 6px;
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 0;
+}
 
-    result = set()
 
-    for standard_skill, aliases in SKILL_ALIASES.items():
+/* Main content */
 
-        for alias in aliases:
+.block-container {
+    position: relative;
+    z-index: 1;
+}
 
-            if alias in text:
 
-                result.add(standard_skill)
-                break
+/* Title */
 
-    return result
+h1 {
+    color: #68456f !important;
+    text-align: center;
+    font-weight: 700 !important;
+}
 
 
-# =========================================================
-# GET JOB SKILLS
-# =========================================================
+/* Section headings */
 
-def get_job_skills(text):
+h2, h3 {
+    color: #704d78 !important;
+}
 
-    text = clean_text(text)
 
-    result = set()
+/* Input areas */
 
-    for standard_skill, aliases in SKILL_ALIASES.items():
+div[data-testid="stTextInput"] > div,
+div[data-testid="stSelectbox"] > div,
+div[data-testid="stNumberInput"] > div {
 
-        for alias in aliases:
+    border-radius: 14px;
+}
 
-            if alias in text:
 
-                result.add(standard_skill)
-                break
+/* Recommend button */
 
-    return result
+.stButton > button {
 
+    width: 100%;
+    border-radius: 16px;
+    border: 1px solid #e8b9d1;
 
-# =========================================================
-# EDUCATION MATCH
-# =========================================================
+    background:
+        linear-gradient(
+            90deg,
+            #f19abc,
+            #bd9be5
+        );
 
-def education_score(user_education, job_education):
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
 
-    user = clean_text(user_education)
-    job = clean_text(job_education)
+    padding: 12px;
 
-    aliases = {
-        "b.tech": ["b.tech", "btech", "b tech"],
-        "bca": ["bca"],
-        "mca": ["mca"],
-        "m.tech": ["m.tech", "mtech", "m tech"],
-        "b.sc": ["b.sc", "bsc", "b sc"],
-        "mba": ["mba"]
-    }
+    box-shadow:
+        0 5px 15px
+        rgba(180, 120, 170, 0.15);
 
-    user_values = aliases.get(
-        user,
-        [user]
-    )
+    transition: 0.2s;
+}
 
-    for value in user_values:
 
-        if value in job:
-            return 20
+.stButton > button:hover {
 
-    return 0
+    transform: translateY(-2px);
 
+    box-shadow:
+        0 8px 20px
+        rgba(180, 120, 170, 0.22);
+}
 
-# =========================================================
-# EXPERIENCE MATCH
-# =========================================================
 
-def experience_score(
-    user_experience,
-    job_experience
-):
+/* Job recommendation card */
 
-    text = str(job_experience).lower()
+.job-card {
 
-    numbers = re.findall(
-        r"\d+(?:\.\d+)?",
-        text
-    )
+    background: rgba(255, 255, 255, 0.82);
 
-    if len(numbers) >= 2:
+    border: 1px solid
+        rgba(226, 187, 211, 0.65);
 
-        minimum = float(numbers[0])
-        maximum = float(numbers[1])
+    border-radius: 20px;
 
-        if minimum <= user_experience <= maximum:
-            return 10
+    padding: 22px;
 
-        if user_experience >= minimum:
-            return 5
+    margin: 16px 0;
 
-        return 0
+    box-shadow:
+        0 8px 25px
+        rgba(100, 70, 110, 0.07);
 
-    if len(numbers) == 1:
+    backdrop-filter: blur(5px);
+}
 
-        required = float(numbers[0])
 
-        if user_experience >= required:
-            return 10
+/* Score */
 
-        return 0
+.score {
 
-    return 10
+    color: #80509a;
 
+    font-size: 27px;
 
-# =========================================================
-# JOB TYPE BOOST
-# =========================================================
+    font-weight: 700;
+}
 
-def role_boost(job_name, user_skills):
 
-    job = clean_text(job_name)
+/* Matched skills */
 
-    boost = 0
+.skill {
 
-    # Python related jobs
-    if "python" in user_skills:
+    display: inline-block;
 
-        if (
-            "python developer" in job
-            or "python developer" in job
-            or "backend developer" in job
-            or "flask developer" in job
-        ):
-            boost += 8
+    background: #e4f8ec;
 
-    # Data related jobs
-    if (
-        "python" in user_skills
-        and "pandas" in user_skills
-        and "numpy" in user_skills
-    ):
+    color: #197447;
 
-        if (
-            "data analyst" in job
-            or "data scientist" in job
-            or "data science" in job
-        ):
-            boost += 7
+    border-radius: 18px;
 
-    # AI / ML
-    if (
-        "python" in user_skills
-        and "machine learning" in user_skills
-    ):
+    padding: 5px 13px;
 
-        if (
-            "ai engineer" in job
-            or "machine learning" in job
-            or "ml engineer" in job
-            or "data scientist" in job
-        ):
-            boost += 7
+    margin: 4px;
 
-    # Web
-    if (
-        "html" in user_skills
-        and "css" in user_skills
-        and "javascript" in user_skills
-    ):
+    font-size: 14px;
+}
 
-        if (
-            "web developer" in job
-            or "frontend" in job
-            or "full stack" in job
-        ):
-            boost += 7
 
-    return boost
+/* Footer */
 
+.footer {
 
-# =========================================================
-# RECOMMEND BUTTON
-# =========================================================
+    text-align: center;
 
-if st.button("🔍 Recommend Jobs"):
+    color: #806b82;
 
-    if not skills_input.strip():
+    padding-top: 20px;
 
-        st.warning(
-            "⚠️ Please enter your skills."
-        )
+    opacity: 0.8;
+}
 
-        st.stop()
-
-    user_skills = get_skills(
-        skills_input
-    )
-
-    if not user_skills:
-
-        st.warning(
-            "⚠️ No recognised skills found. "
-            "Please enter skills such as Python, SQL, Flask, etc."
-        )
-
-        st.stop()
-
-    recommendations = []
-
-    # =====================================================
-    # CALCULATE EACH JOB
-    # =====================================================
-
-    for _, job in jobs.iterrows():
-
-        job_skills = get_job_skills(
-            job["Skills"]
-        )
-
-        # -----------------------------------------------
-        # SKILL MATCH
-        # -----------------------------------------------
-
-        matched = (
-            user_skills.intersection(
-                job_skills
-            )
-        )
-
-        missing = (
-            job_skills - user_skills
-        )
-
-        if len(job_skills) > 0:
-
-            skill_percentage = (
-                len(matched)
-                / len(job_skills)
-            ) * 100
-
-        else:
-
-            skill_percentage = 0
-
-        # -----------------------------------------------
-        # EDUCATION
-        # -----------------------------------------------
-
-        edu_score = education_score(
-            education_input,
-            job["Education"]
-        )
-
-        # -----------------------------------------------
-        # EXPERIENCE
-        # -----------------------------------------------
-
-        exp_score = experience_score(
-            experience_input,
-            job["Experience"]
-        )
-
-        # -----------------------------------------------
-        # MAIN SCORE
-        # -----------------------------------------------
-
-        skill_score = (
-            skill_percentage * 0.70
-        )
-
-        total_score = (
-            skill_score
-            + edu_score
-            + exp_score
-        )
-
-        # -----------------------------------------------
-        # ROLE BOOST
-        # -----------------------------------------------
-
-        boost = role_boost(
-            job["Job"],
-            user_skills
-        )
-
-        total_score += boost
-
-        total_score = min(
-            total_score,
-            100
-        )
-
-        recommendations.append({
-
-            "job": job["Job"],
-
-            "score": total_score,
-
-            "matched": matched,
-
-            "missing": missing,
-
-            "education": job["Education"],
-
-            "experience": job["Experience"]
-
-        })
-
-    # =====================================================
-    # SORT BEST MATCH FIRST
-    # =====================================================
-
-    recommendations.sort(
-        key=lambda x: x["score"],
-        reverse=True
-    )
-
-    # =====================================================
-    # TOP 5
-    # =====================================================
-
-    top_jobs = recommendations[:5]
-
-    # =====================================================
-    # RESULTS
-    # =====================================================
-
-    st.success(
-        "✅ Best matching jobs found!"
-    )
-
-    st.header(
-        "🏆 Top 5 Job Recommendations"
-    )
-
-    for i, rec in enumerate(
-        top_jobs,
-        start=1
-    ):
-
-        score = rec["score"]
-
-        st.subheader(
-            f"{i}. {rec['job']}"
-        )
-
-        st.progress(
-            int(score)
-        )
-
-        st.write(
-            f"**Match Score:** "
-            f"{score:.1f}%"
-        )
-
-        st.write(
-            f"**Education Required:** "
-            f"{rec['education']}"
-        )
-
-        st.write(
-            f"**Experience Required:** "
-            f"{rec['experience']}"
-        )
-
-        # -----------------------------------------------
-        # MATCHED SKILLS
-        # -----------------------------------------------
-
-        if rec["matched"]:
-
-            st.write(
-                "✅ **Matched Skills:** "
-                + ", ".join(
-                    sorted(rec["matched"])
-                )
-            )
-
-        else:
-
-            st.write(
-                "✅ **Matched Skills:** None"
-            )
-
-        # -----------------------------------------------
-        # MISSING SKILLS
-        # -----------------------------------------------
-
-        if rec["missing"]:
-
-            st.write(
-                "⚠️ **Missing Skills:** "
-                + ", ".join(
-                    sorted(rec["missing"])
-                )
-            )
-
-        else:
-
-            st.write(
-                "🎉 **Missing Skills:** None"
-            )
-
-        # -----------------------------------------------
-        # RECOMMENDATION LEVEL
-        # -----------------------------------------------
-
-        if score >= 80:
-
-            st.success(
-                "🌟 Excellent Match"
-            )
-
-        elif score >= 60:
-
-            st.info(
-                "👍 Good Match"
-            )
-
-        elif score >= 40:
-
-            st.warning(
-                "🙂 Moderate Match"
-            )
-
-        else:
-
-            st.error(
-                "⚠️ Low Match"
-            )
-
-        st.divider()
-
-
-# =========================================================
-# FOOTER
-# =========================================================
-
-st.caption(
-    "🤖 AI Job Recommendation System | "
-    "Python + Pandas + Streamlit"
-)
+</style>
+""", unsafe_allow_html=True)
